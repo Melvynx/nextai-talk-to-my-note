@@ -1,18 +1,21 @@
-'use client';
+"use client";
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { NextAI } from "@/components/maker/NextAI";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { useChat } from 'ai/react';
-import { RefreshCcw, Square } from 'lucide-react';
-import Markdown from 'react-markdown';
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useChat } from "ai/react";
+import { RefreshCcw, Square } from "lucide-react";
+import Link from "next/link";
+import Markdown from "react-markdown";
+import { ReactSVG } from "./ReactSVG";
 
 export const Chat = () => {
   const {
@@ -22,27 +25,93 @@ export const Chat = () => {
     handleSubmit,
     reload,
     stop,
+    setMessages,
     isLoading,
   } = useChat({
-    api: '/api/askme',
+    api: "/api/askme",
     initialMessages: [],
   });
 
+  const form = (
+    <form
+      className="w-full"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(e);
+      }}
+    >
+      <fieldset className="flex gap-4" disabled={isLoading}>
+        <Textarea
+          placeholder="Ask your React related question."
+          value={input}
+          onChange={handleInputChange}
+        />
+        <Button type="submit">Send</Button>
+      </fieldset>
+    </form>
+  );
+
+  if (messages.length === 0) {
+    return (
+      <div
+        id="landing-page"
+        className="flex items-center justify-center h-full flex-col gap-4 max-w-xl w-full m-auto"
+      >
+        <ReactSVG
+          className="w-20 h-20 text-cyan-400 animate-spin"
+          style={{ animationDuration: "10s" }}
+        />
+        <h2 className="text-3xl font-bold">
+          Chat with{" "}
+          <Link
+            href="https://react.dev"
+            className="text-cyan-400 hover:underline"
+          >
+            React.dev
+          </Link>
+        </h2>
+        {form}
+        <NextAI />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col max-w-2xl m-auto px-4 gap-4 py-4">
-      <h2 className="text-3xl font-bold">Chat with your notes</h2>
+      <div className="flex items-center gap-2">
+        <ReactSVG
+          className="w-12 h-12 text-cyan-400 animate-spin"
+          style={{ animationDuration: "10s" }}
+        />
+        <h2 className="text-3xl font-bold">
+          Chat with{" "}
+          <Link
+            href="https://react.dev"
+            className="text-cyan-400 hover:underline"
+          >
+            React.dev
+          </Link>
+        </h2>
+      </div>
       <div className="flex-1 overflow-auto flex flex-col gap-2">
         {messages.map((m) => (
           <Card key={m.id} className="flex flex-row gap-4">
             <CardHeader className="p-2 pr-0">
               <Avatar>
                 <AvatarFallback>
-                  {m.role === 'assistant' ? 'AI' : 'U'}
+                  {m.role === "assistant" ? "AI" : "U"}
                 </AvatarFallback>
               </Avatar>
             </CardHeader>
-            <CardContent className="p-2 pl-0">
-              <Markdown className="prose dark:prose-invert">{m.content}</Markdown>
+            <CardContent
+              className="p-2 pl-0"
+              style={{
+                maxWidth: 570,
+              }}
+            >
+              <Markdown className="prose dark:prose-invert">
+                {m.content}
+              </Markdown>
             </CardContent>
           </Card>
         ))}
@@ -50,7 +119,9 @@ export const Chat = () => {
           <Card>
             <CardHeader className="p-2">
               <CardTitle>No messages yet</CardTitle>
-              <CardDescription>Start typing to chat with the AI</CardDescription>
+              <CardDescription>
+                Start typing to chat with the AI
+              </CardDescription>
             </CardHeader>
           </Card>
         ) : null}
@@ -67,6 +138,14 @@ export const Chat = () => {
             <RefreshCcw size={16} className="mr-2" />
             Reload
           </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              setMessages([]);
+            }}
+          >
+            Reset
+          </Button>
           {isLoading ? (
             <Button onClick={() => stop()} size="sm">
               <Square size={16} className="mr-2" />
@@ -74,17 +153,7 @@ export const Chat = () => {
             </Button>
           ) : null}
         </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(e);
-          }}
-        >
-          <fieldset className="flex gap-4" disabled={isLoading}>
-            <Textarea value={input} onChange={handleInputChange} />
-            <Button type="submit">Send</Button>
-          </fieldset>
-        </form>
+        {form}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-import { openai } from '@/lib/openai';
-import { neon } from '@neondatabase/serverless';
-import { Message, OpenAIStream, StreamingTextResponse } from 'ai';
-import { NextResponse } from 'next/server';
+import { openai } from "@/lib/openai";
+import { neon } from "@neondatabase/serverless";
+import { Message, OpenAIStream, StreamingTextResponse } from "ai";
+import { NextResponse } from "next/server";
 
 export interface CompletionParams {
   model: string;
@@ -17,27 +17,30 @@ export interface CompletionParams {
 const max_tokens = 1700;
 
 // See https://vercel.com/docs/concepts/functions/edge-functions
-export const runtime = 'edge';
+export const runtime = "edge";
 
 const SYSTEM_MESSAGE = `Context:
-Tu es NoteGPT, un assistant personnel qui permet de parler avec ces notes.
-Tu es un expert pour résumer des notes de manière synthétique et efficace.
-Tu es très doué pour trouver des liens entre les notes et les questions de l'utilisateur.
+You are ReactExpertGPT, a chatbot that know up to date information about React.
+Your task is to create simple, easy to understand responses to questions about React.
+You use examples (with code), metaphor and line breaks to make your responses easy to understand.
+Your talking to react beginners, so you need to use simple language and avoid jargon.
+Make your responses very short and to the point.
 
-Goal: 
-Tu as accès à des 'highlight' des notes en fonction de la question de l'utilisateur et ton objectif et de lui donner une réponses, des informations et des liens vers les ressources de ces notes.
+Goal:
+Create a response to the user's question about React.
 
-Critères:
-Quand tu te bases sur les informations des notes, tu dis toujours les sources en utilisant le "file path" à la fin source forme de liste ordonnées avec le path.
-Quand tu fais ta réponse et que tu fais allusion au contenu des notes, tu utilises le [numero] dans des [] pour faire référence à la note.
-Tu essaie toujours d'aider l'utilisateur.
-Tu essaie toujours de faire des réponses courtes et précises.
-Tu essaie toujours de faire des réponses qui sont en rapport avec la question de l'utilisateur.
 
-Format de réponse:
-Tu réponds toujours avec des phrases courtes et précises.
-Tu donnes toujours les [référence] aux notes.
-Tu ajoutes toujours des liens vers les notes en fin de réponses.`;
+Criteria:
+To answer the question, I will give you context about the question. You need to use this context to answer the question.
+The context always context the URL from the React documentation.
+When you use the context, please add your sources at the end of the conversations with the links to the documentation.
+If the user asks for questions that is not about React, you should respond with "I am sorry, but I am here to help only with React".
+
+Response format:
+* Short
+* To the point
+* Use examples (with code)
+`;
 
 export const POST = async (req: Request) => {
   const { messages: baseMessage } = (await req.json()) as {
@@ -46,7 +49,7 @@ export const POST = async (req: Request) => {
 
   if (!baseMessage) {
     return NextResponse.json({
-      error: 'No prompt in the request',
+      error: "No prompt in the request",
     });
   }
 
@@ -55,26 +58,26 @@ export const POST = async (req: Request) => {
   const query = lastMessage.content;
 
   const messages: Message[] = [
-    { role: 'system', content: SYSTEM_MESSAGE, id: 'system-id' },
+    { role: "system", content: SYSTEM_MESSAGE, id: "system-id" },
     ...baseMessageWithoutLast,
   ];
 
   try {
     const response = await openai.embeddings.create({
       input: query,
-      model: 'text-embedding-ada-002',
+      model: "text-embedding-ada-002",
     });
 
     const q_embeddings = response.data[0].embedding;
-    console.log('Received embeddings');
-    const q_embeddings_str = q_embeddings.toString().replace(/\.\.\./g, '');
+    console.log("Received embeddings");
+    const q_embeddings_str = q_embeddings.toString().replace(/\.\.\./g, "");
 
     // Query the database for the context
     const sql = neon(process.env.DATABASE_URL!);
     const insertQuery = `
-      SELECT text
+      SELECT text, file_path
       FROM (
-        SELECT text, n_tokens, embeddings,
+        SELECT text, n_tokens, embeddings, file_path,
         (embeddings <=> '[${q_embeddings_str}]') AS distances,
         SUM(n_tokens) OVER (ORDER BY (embeddings <=> '[${q_embeddings_str}]')) AS cum_n_tokens
         FROM documents
@@ -84,31 +87,42 @@ export const POST = async (req: Request) => {
       `;
 
     const queryParams = [max_tokens];
-    const result = (await sql(insertQuery, queryParams)) as { text: string }[];
-
-    console.log('Used context :');
+    const result = (await sql(insertQuery, queryParams)) as {
+      text: string;
+      file_path: string;
+    }[];
 
     const context = result
-      .map((c, index) => `${index + 1}: ${c.text}`)
-      .filter((c) => c.length > 5)
-      .join('\n\n');
+      .map(
+        (c, index) =>
+          `${`https://react.dev/${c.file_path
+            .replaceAll("-", "/")
+            .replaceAll(".txt", "")}`}: ${c.text}`
+      )
+      .join("\n\n");
+
+    console.log("=== CONTEXT ===");
+
+    console.log(result.map((r) => `${r.file_path}`).join("\n\n"));
 
     console.log(context);
 
+    console.log("=== END CONTEXT ===");
+
     messages.push({
-      role: 'system',
+      role: "system",
       content: `Context: ${context}`,
       id: new Date().getTime().toString(),
     });
     messages.push(lastMessage);
   } catch (e) {
-    console.error('🔴 Error', e);
+    console.error("🔴 Error", e);
   } finally {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-1106-preview',
+      model: "gpt-4-1106-preview",
       stream: true,
       messages: messages.map((m) => ({
-        role: m.role as 'user' | 'system' | 'assistant',
+        role: m.role as "user" | "system" | "assistant",
         content: m.content,
       })),
     });
