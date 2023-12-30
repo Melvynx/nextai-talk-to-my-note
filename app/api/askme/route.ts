@@ -1,6 +1,7 @@
 import { openai } from "@/lib/openai";
 import { neon } from "@neondatabase/serverless";
 import { Message, OpenAIStream, StreamingTextResponse } from "ai";
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export interface CompletionParams {
@@ -42,10 +43,62 @@ Response format:
 * Use examples (with code)
 `;
 
+const checkUsage = async () => {
+  const headerList = headers();
+  const ip = headerList.get("x-real-ip") || headerList.get("x-forwarded-for");
+
+  console.log({ ip });
+
+  // check if the ip has not made more than 5 requests in the last 10 minutes
+  const sql = neon(process.env.DATABASE_URL!);
+
+  const searchQuery = `
+  SELECT COUNT(*) AS count
+  FROM usage
+  WHERE ip_address = $1 AND createed_at > NOW() - INTERVAL '10 minutes';
+  `;
+
+  const searchQueryParams = [ip];
+
+  const searchResult = (await sql(searchQuery, searchQueryParams)) as {
+    count: number;
+  }[];
+
+  console.log({ searchResult });
+
+  if (searchResult[0].count > 2) {
+    throw new Error("Too many requests");
+  }
+
+  // insert the ip address
+  const insertQuery = `
+  INSERT INTO usage (ip_address)
+  VALUES ($1);
+  `;
+
+  const insertQueryParams = [ip];
+
+  await sql(insertQuery, insertQueryParams);
+};
+
 export const POST = async (req: Request) => {
   const { messages: baseMessage } = (await req.json()) as {
     messages: Message[];
   };
+
+  try {
+    await checkUsage();
+  } catch (e) {
+    console.log({ e });
+    return NextResponse.json(
+      {
+        error: "Too many requests",
+      },
+      {
+        status: 429,
+      }
+    );
+  }
 
   if (!baseMessage) {
     return NextResponse.json({

@@ -15,6 +15,7 @@ import { useChat } from "ai/react";
 import { RefreshCcw, Square } from "lucide-react";
 import Link from "next/link";
 import Markdown from "react-markdown";
+import { toast } from "sonner";
 import { ReactSVG } from "./ReactSVG";
 
 export const Chat = () => {
@@ -29,6 +30,11 @@ export const Chat = () => {
     isLoading,
   } = useChat({
     api: "/api/askme",
+    onError: () => {
+      toast.error(
+        "Usage limit reached. Please try again later. (max 5 messages every 10 minutes)"
+      );
+    },
     initialMessages: [],
   });
 
