@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Typography } from "../ui/typography";
 
+import { usePlausible } from "next-plausible";
 import type { MouseEventHandler } from "react";
 
 export const findDegree = (
@@ -24,6 +25,7 @@ export const findDegree = (
 export type NextAIProps = {};
 
 export const NextAI = (props: NextAIProps) => {
+  const plausible = usePlausible();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export const NextAI = (props: NextAIProps) => {
       <Typography
         variant="large"
         as={Link}
+        onClick={() => plausible("nextai-click")}
         className="mt-2"
         href="https://codelynx.dev/nextai/courses"
       >
@@ -67,6 +70,7 @@ export const NextAI = (props: NextAIProps) => {
         <Link
           href="https://codelynx.dev/nextai/courses"
           className="text-cyan-500 hover:underline"
+          onClick={() => plausible("nextai-click")}
         >
           Try the free course now. (in 🇫🇷)
         </Link>

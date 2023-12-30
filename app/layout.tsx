@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import PlausibleProvider from "next-plausible";
 import clsx from "clsx";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={clsx(GeistMono.variable, GeistSans.variable, "h-full")}>
         <Toaster />
-        {children}
+        <PlausibleProvider domain="react.codelynx.dev">
+          {children}
+        </PlausibleProvider>
       </body>
     </html>
   );

@@ -24,6 +24,7 @@
     "geist": "^1.2.0",
     "lucide-react": "^0.302.0",
     "next": "14.0.4",
+    "next-plausible": "^3.12.0",
     "next-themes": "^0.2.1",
     "openai": "^4.20.1",
     "react": "^18",
