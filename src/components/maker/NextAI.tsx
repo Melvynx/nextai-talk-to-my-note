@@ -60,7 +60,7 @@ export const NextAI = (props: NextAIProps) => {
         as={Link}
         onClick={() => plausible("nextai-click")}
         className="mt-2"
-        href="https://codelynx.dev/nextai/courses"
+        href="https://codelynx.dev/nextai/courses?ref=react-chat-title"
       >
         NextAI
       </Typography>
@@ -68,7 +68,7 @@ export const NextAI = (props: NextAIProps) => {
         The tranining courses where you will learn how to create your own AI
         applications.{" "}
         <Link
-          href="https://codelynx.dev/nextai/courses"
+          href="https://codelynx.dev/nextai/courses?ref=react-chat-try-free"
           className="text-cyan-500 hover:underline"
           onClick={() => plausible("nextai-click")}
         >
