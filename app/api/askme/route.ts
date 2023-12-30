@@ -66,7 +66,7 @@ const checkUsage = async () => {
 
   console.log({ searchResult });
 
-  if (searchResult[0].count > 2) {
+  if (searchResult[0].count > 5) {
     throw new Error("Too many requests");
   }
 
