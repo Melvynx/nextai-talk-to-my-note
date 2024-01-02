@@ -149,7 +149,7 @@ export const POST = async (req: Request) => {
       .map(
         (c, index) =>
           `${`https://react.dev/${c.file_path
-            .replaceAll("-", "/")
+            .replace("-", "/")
             .replaceAll(".txt", "")}`}: ${c.text}`
       )
       .join("\n\n");
