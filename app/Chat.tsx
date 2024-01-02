@@ -61,7 +61,7 @@ export const Chat = () => {
     return (
       <div
         id="landing-page"
-        className="flex items-center justify-center h-full flex-col gap-4 max-w-xl w-full m-auto"
+        className="flex items-center px-4 justify-center h-full flex-col gap-4 max-w-xl w-full m-auto"
       >
         <ReactSVG
           className="w-20 h-20 text-cyan-400 animate-spin"
@@ -112,7 +112,7 @@ export const Chat = () => {
             <CardContent
               className="p-2 pl-0"
               style={{
-                maxWidth: 570,
+                maxWidth: "calc(100% - 48px)",
               }}
             >
               <Markdown className="prose dark:prose-invert">

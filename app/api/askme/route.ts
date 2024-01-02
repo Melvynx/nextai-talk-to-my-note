@@ -66,7 +66,7 @@ const checkUsage = async () => {
 
   console.log({ searchResult });
 
-  if (searchResult[0].count > 5) {
+  if (searchResult[0].count > 10) {
     throw new Error("Too many requests");
   }
 
@@ -149,7 +149,7 @@ export const POST = async (req: Request) => {
       .map(
         (c, index) =>
           `${`https://react.dev/${c.file_path
-            .replace("-", "/")
+            .replaceAll("-", "/")
             .replaceAll(".txt", "")}`}: ${c.text}`
       )
       .join("\n\n");
@@ -157,10 +157,6 @@ export const POST = async (req: Request) => {
     console.log("=== CONTEXT ===");
 
     console.log(result.map((r) => `${r.file_path}`).join("\n\n"));
-
-    console.log(context);
-
-    console.log("=== END CONTEXT ===");
 
     messages.push({
       role: "system",
