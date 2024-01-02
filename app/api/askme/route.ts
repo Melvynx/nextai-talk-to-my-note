@@ -154,10 +154,6 @@ export const POST = async (req: Request) => {
       )
       .join("\n\n");
 
-    console.log("=== CONTEXT ===");
-
-    console.log(result.map((r) => `${r.file_path}`).join("\n\n"));
-
     messages.push({
       role: "system",
       content: `Context: ${context}`,
