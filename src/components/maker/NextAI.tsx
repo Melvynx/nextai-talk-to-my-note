@@ -29,12 +29,6 @@ export const NextAI = (props: NextAIProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const pricingElement = document.querySelector("#landing-page");
-
-    if (!pricingElement || !ref.current) {
-      return;
-    }
-
     const onMouseMove = (event: MouseEvent) => {
       if (!ref.current) return;
       findDegree(ref.current, event as never);
@@ -60,7 +54,7 @@ export const NextAI = (props: NextAIProps) => {
         as={Link}
         onClick={() => plausible("nextai-click")}
         className="mt-2"
-        href="https://codelynx.dev/nextai/courses?ref=react-chat-title"
+        href="https://codelynx.dev/nextai/courses?utm_campaign=react-chat-title"
       >
         NextAI
       </Typography>
@@ -68,7 +62,7 @@ export const NextAI = (props: NextAIProps) => {
         The tranining courses where you will learn how to create your own AI
         applications.{" "}
         <Link
-          href="https://codelynx.dev/nextai/courses?ref=react-chat-try-free"
+          href="https://codelynx.dev/nextai/courses?utm_campaign=react-chat-try-free"
           className="text-cyan-500 hover:underline"
           onClick={() => plausible("nextai-click")}
         >

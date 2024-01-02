@@ -22,12 +22,12 @@ export const Chat = () => {
   const {
     messages,
     input,
+    isLoading,
     handleInputChange,
     handleSubmit,
     reload,
     stop,
     setMessages,
-    isLoading,
   } = useChat({
     api: "/api/askme",
     onError: () => {
@@ -99,7 +99,7 @@ export const Chat = () => {
           </Link>
         </h2>
       </div>
-      <div className="flex-1 overflow-auto flex flex-col gap-2">
+      <div className="flex-1 overflow-auto flex flex-col gap-2 pb-8">
         {messages.map((m) => (
           <Card key={m.id} className="flex flex-row gap-4">
             <CardHeader className="p-2 pr-0">
@@ -146,6 +146,7 @@ export const Chat = () => {
           </Button>
           <Button
             size="sm"
+            disabled={isLoading}
             onClick={() => {
               setMessages([]);
             }}
